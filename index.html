@@ -22,6 +22,56 @@
       overflow-x: hidden;
     }
 
+    /* Welcome Cover Overlay */
+    #introOverlay {
+      position: absolute;
+      inset: 0;
+      background: #111a24;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      transition: opacity 0.8s ease, visibility 0.8s ease;
+    }
+
+    .cover-names {
+      font-family: 'Alex Brush', cursive;
+      font-size: 50px;
+      color: #a4c2db;
+      margin-bottom: 10px;
+    }
+
+    .cover-subtitle {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 12px;
+      letter-spacing: 2px;
+      color: #eef4f9;
+      text-transform: uppercase;
+      margin-bottom: 30px;
+    }
+
+    .open-btn {
+      background: transparent;
+      color: #a4c2db;
+      border: 1.5px solid #a4c2db;
+      padding: 12px 28px;
+      border-radius: 30px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+    }
+
+    .open-btn:hover {
+      background: #a4c2db;
+      color: #111a24;
+    }
+
     /* Music Button */
     .music-btn {
       position: absolute;
@@ -108,7 +158,14 @@
 
   <div class="card-container">
     
-    <!-- Audio File and Play Button -->
+    <!-- Welcome Cover -->
+    <div id="introOverlay">
+      <h1 class="cover-names">Shaista & Ikram</h1>
+      <p class="cover-subtitle">You are cordially invited</p>
+      <button id="openBtn" class="open-btn">Open Invitation</button>
+    </div>
+
+    <!-- Audio File -->
     <audio id="bgMusic" loop>
       <source src="westdream_music-inspiring-cinematic-weeding-180995.mp3" type="audio/mpeg">
     </audio>
@@ -194,6 +251,7 @@
     const slides = document.querySelectorAll('.slide');
     const dots = document.querySelectorAll('.progress-dot');
     let currentIndex = 0;
+    let autoSlideInterval;
 
     function showSlide(index) {
       slides.forEach((slide, i) => {
@@ -202,27 +260,36 @@
       });
     }
 
-    document.getElementById('nextBtn').addEventListener('click', () => { currentIndex = (currentIndex + 1) % slides.length; showSlide(currentIndex); });
-    document.getElementById('prevBtn').addEventListener('click', () => { currentIndex = (currentIndex - 1 + slides.length) % slides.length; showSlide(currentIndex); });
-    setInterval(() => { currentIndex = (currentIndex + 1) % slides.length; showSlide(currentIndex); }, 7000);
+    document.getElementById('nextBtn').addEventListener('click', () => { currentIndex = (currentIndex + 1) % slides.length; showSlide(currentIndex); resetInterval(); });
+    document.getElementById('prevBtn').addEventListener('click', () => { currentIndex = (currentIndex - 1 + slides.length) % slides.length; showSlide(currentIndex); resetInterval(); });
+    
+    function resetInterval() {
+      clearInterval(autoSlideInterval);
+      autoSlideInterval = setInterval(() => { currentIndex = (currentIndex + 1) % slides.length; showSlide(currentIndex); }, 7000);
+    }
 
-    // Music Player Logic
+    // New Music & Cover Logic
+    const introOverlay = document.getElementById('introOverlay');
+    const openBtn = document.getElementById('openBtn');
     const musicBtn = document.getElementById('musicBtn');
     const bgMusic = document.getElementById('bgMusic');
     let isPlaying = false;
 
-    // Start music on the very first tap ANYWHERE on the screen
-    document.body.addEventListener('click', function() {
-      if (!isPlaying) {
-        bgMusic.play();
-        musicBtn.innerHTML = '⏸ Pause';
-        isPlaying = true;
-      }
-    }, { once: true }); 
+    // Start everything when the user clicks "Open Invitation"
+    openBtn.addEventListener('click', () => {
+      bgMusic.play();
+      musicBtn.innerHTML = '⏸ Pause';
+      isPlaying = true;
+      
+      introOverlay.style.opacity = '0';
+      introOverlay.style.visibility = 'hidden';
+      
+      // Start auto-slides once opened
+      resetInterval();
+    });
 
-    // Keep the button working for pausing/playing later
     musicBtn.addEventListener('click', (event) => {
-      event.stopPropagation(); // Prevents the body click from interfering
+      event.stopPropagation();
       if (isPlaying) {
         bgMusic.pause();
         musicBtn.innerHTML = '🎵 Play';
