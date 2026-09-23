@@ -211,7 +211,18 @@
     const bgMusic = document.getElementById('bgMusic');
     let isPlaying = false;
 
-    musicBtn.addEventListener('click', () => {
+    // Start music on the very first tap ANYWHERE on the screen
+    document.body.addEventListener('click', function() {
+      if (!isPlaying) {
+        bgMusic.play();
+        musicBtn.innerHTML = '⏸ Pause';
+        isPlaying = true;
+      }
+    }, { once: true }); 
+
+    // Keep the button working for pausing/playing later
+    musicBtn.addEventListener('click', (event) => {
+      event.stopPropagation(); // Prevents the body click from interfering
       if (isPlaying) {
         bgMusic.pause();
         musicBtn.innerHTML = '🎵 Play';
