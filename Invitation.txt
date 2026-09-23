@@ -1,0 +1,514 @@
+This code
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wedding Invitation | Shaista & Ikram</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Cinzel:wght@400;600;700&family=Montserrat:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: #111a24;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      font-family: 'Montserrat', sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* Falling Petals Canvas */
+    #petalCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    /* Main Container formatted like a luxury mobile card */
+    .card-container {
+      position: relative;
+      width: 100%;
+      max-width: 440px;
+      height: 92vh;
+      max-height: 860px;
+      background: radial-gradient(circle at center, #ffffff 40%, #eef4f9 100%);
+      border-radius: 20px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.45);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid rgba(135, 174, 204, 0.4);
+    }
+
+    /* Decorative Corner Florals */
+    .floral {
+      position: absolute;
+      width: 160px;
+      opacity: 0.9;
+      pointer-events: none;
+      z-index: 5;
+    }
+    .floral-tl { top: -20px; left: -20px; }
+    .floral-tr { top: -20px; right: -20px; transform: scaleX(-1); }
+    .floral-bl { bottom: -20px; left: -20px; transform: scaleY(-1); }
+    .floral-br { bottom: -20px; right: -20px; transform: scale(-1); }
+
+    /* Frame Border */
+    .inner-border {
+      position: absolute;
+      inset: 18px;
+      border: 1.5px solid #8caec7;
+      border-radius: 12px;
+      pointer-events: none;
+      z-index: 4;
+    }
+    .inner-border::after {
+      content: '';
+      position: absolute;
+      inset: 3px;
+      border: 0.8px dashed #abc5d8;
+      border-radius: 9px;
+    }
+
+    /* Slides & Animation */
+    .slides-wrapper {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      z-index: 6;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      padding: 45px 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(20px) scale(0.98);
+      transition: all 0.9s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    .slide.active {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0) scale(1);
+    }
+
+    /* Typography Styles */
+    .bismillah {
+      font-family: 'Cinzel', serif;
+      font-size: 13px;
+      letter-spacing: 2px;
+      color: #3b5a75;
+      margin-bottom: 12px;
+    }
+
+    .script-title {
+      font-family: 'Alex Brush', cursive;
+      font-size: 46px;
+      color: #7a2638;
+      line-height: 1.1;
+      margin-bottom: 14px;
+    }
+
+    .quote {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: 13px;
+      color: #486278;
+      line-height: 1.6;
+      max-width: 85%;
+      margin-bottom: 20px;
+    }
+
+    .host-intro {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #5d7182;
+      margin-bottom: 6px;
+    }
+
+    .hosts-name {
+      font-family: 'Alex Brush', cursive;
+      font-size: 34px;
+      color: #7a2638;
+      margin-bottom: 10px;
+    }
+
+    .hosts-desc {
+      font-size: 12px;
+      color: #55697a;
+      line-height: 1.6;
+      max-width: 90%;
+    }
+
+    .couple-names {
+      font-family: 'Alex Brush', cursive;
+      font-size: 42px;
+      color: #7a2638;
+      margin: 15px 0 5px;
+      line-height: 1.2;
+    }
+
+    .connector {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: 20px;
+      color: #3a5369;
+      display: block;
+    }
+
+    .venue-box {
+      margin-top: 15px;
+      padding: 12px 18px;
+      border-top: 1px solid #c8d8e4;
+      border-bottom: 1px solid #c8d8e4;
+    }
+    .venue-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #617b91;
+    }
+    .venue-address {
+      font-weight: 600;
+      color: #7a2638;
+      font-size: 13px;
+      margin-top: 5px;
+      letter-spacing: 0.5px;
+    }
+
+    /* Program Schedule Table */
+    .programme-card {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.7);
+      border-radius: 10px;
+      padding: 15px;
+      border: 1px solid #d5e2ed;
+      margin-top: 10px;
+    }
+
+    .event-row {
+      margin-bottom: 14px;
+      padding-bottom: 12px;
+      border-bottom: 1px dashed #c0d4e3;
+    }
+    .event-row:last-child {
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+
+    .event-name {
+      font-family: 'Cinzel', serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: #7a2638;
+      letter-spacing: 1px;
+    }
+
+    .event-time-badge {
+      display: inline-block;
+      margin-top: 4px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #2b455b;
+      background: #e2edf6;
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+
+    .event-note {
+      font-size: 11px;
+      color: #556c7d;
+      margin-top: 5px;
+      font-style: italic;
+    }
+
+    /* Contact & RSVP */
+    .rsvp-box {
+      margin-top: 16px;
+      font-size: 12px;
+      color: #3b5063;
+    }
+    .rsvp-numbers {
+      font-weight: 600;
+      letter-spacing: 1px;
+      color: #7a2638;
+      margin-top: 5px;
+    }
+
+    /* Navigation Controls */
+    .controls {
+      position: absolute;
+      bottom: 22px;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 18px;
+      z-index: 20;
+    }
+
+    .btn-nav {
+      background: #39546b;
+      color: white;
+      border: none;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 4px 10px rgba(43, 69, 91, 0.3);
+      transition: all 0.3s ease;
+    }
+    .btn-nav:hover {
+      background: #7a2638;
+      transform: scale(1.08);
+    }
+
+    /* Progress Indicators */
+    .progress-bar {
+      position: absolute;
+      top: 26px;
+      width: 70%;
+      display: flex;
+      gap: 6px;
+      z-index: 20;
+    }
+    .progress-dot {
+      flex: 1;
+      height: 3px;
+      background: rgba(140, 174, 199, 0.4);
+      border-radius: 2px;
+      transition: background 0.4s ease;
+    }
+    .progress-dot.active {
+      background: #7a2638;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card-container">
+    <canvas id="petalCanvas"></canvas>
+    <div class="inner-border"></div>
+
+    <svg class="floral floral-tl" viewBox="0 0 100 100">
+      <path d="M0,0 C40,10 65,35 75,75 C55,60 30,45 0,0" fill="#a4c2db" opacity="0.6"/>
+      <circle cx="35" cy="35" r="16" fill="#678fae" opacity="0.8"/>
+      <circle cx="55" cy="20" r="12" fill="#8cb3d1" opacity="0.7"/>
+    </svg>
+    <svg class="floral floral-tr" viewBox="0 0 100 100">
+      <path d="M0,0 C40,10 65,35 75,75 C55,60 30,45 0,0" fill="#a4c2db" opacity="0.6"/>
+      <circle cx="35" cy="35" r="16" fill="#678fae" opacity="0.8"/>
+      <circle cx="55" cy="20" r="12" fill="#8cb3d1" opacity="0.7"/>
+    </svg>
+    <svg class="floral floral-bl" viewBox="0 0 100 100">
+      <path d="M0,0 C40,10 65,35 75,75 C55,60 30,45 0,0" fill="#a4c2db" opacity="0.6"/>
+      <circle cx="35" cy="35" r="16" fill="#678fae" opacity="0.8"/>
+      <circle cx="55" cy="20" r="12" fill="#8cb3d1" opacity="0.7"/>
+    </svg>
+    <svg class="floral floral-br" viewBox="0 0 100 100">
+      <path d="M0,0 C40,10 65,35 75,75 C55,60 30,45 0,0" fill="#a4c2db" opacity="0.6"/>
+      <circle cx="35" cy="35" r="16" fill="#678fae" opacity="0.8"/>
+      <circle cx="55" cy="20" r="12" fill="#8cb3d1" opacity="0.7"/>
+    </svg>
+
+    <div style="display:flex; justify-content:center; width:100%;">
+      <div class="progress-bar">
+        <div class="progress-dot active"></div>
+        <div class="progress-dot"></div>
+        <div class="progress-dot"></div>
+        <div class="progress-dot"></div>
+      </div>
+    </div>
+
+    <div class="slides-wrapper">
+      
+      <div class="slide active">
+        <div class="bismillah">بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ</div>
+        <h1 class="script-title">Invitation</h1>
+        <p class="quote">
+          “Marriages are settled in heaven but celebrated on Earth. The unite of two souls are written right from birth.”
+        </p>
+        <div style="font-size: 11px; letter-spacing: 2px; color: #728a9c; text-transform: uppercase;">
+          Swipe or Click Next ❯
+        </div>
+      </div>
+
+      <div class="slide">
+        <span class="host-intro">Cordially Invited By</span>
+        <h2 class="hosts-name">Mrs. & Mr. Gulzar Ahmad Wani</h2>
+        <p class="hosts-desc">
+          Request your blessed presence and prayers on the auspicious occasion of the wedding ceremony of their beloved daughter
+        </p>
+        <div class="couple-names">
+          Shaista
+          <span class="connector">weds</span>
+          Ikram
+        </div>
+      </div>
+
+      <div class="slide">
+        <h2 class="script-title" style="font-size: 38px; margin-bottom: 6px;">Programme</h2>
+        <div style="font-size: 11px; color:#5d7285; margin-bottom: 10px;">(Insha Allah)</div>
+        
+        <div class="programme-card">
+          <div class="event-row">
+            <div class="event-name">Mehandiraat</div>
+            <div class="event-time-badge">Saturday, 03 October 2026 • 9:00 PM</div>
+          </div>
+          <div class="event-row">
+            <div class="event-name">Wedding Lunch</div>
+            <div class="event-time-badge">Sunday, 04 October 2026 • 2:30 PM</div>
+            <div class="event-note">Gents: 2:30 PM | Ladies: 4:00 PM</div>
+          </div>
+          <div class="event-row">
+            <div class="event-name">Reception of Baraat</div>
+            <div class="event-time-badge">Sunday, 04 October 2026 • 11:00 PM</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide">
+        <h2 class="script-title" style="font-size: 38px; margin-bottom: 4px;">Venue & RSVP</h2>
+        
+        <div class="venue-box">
+          <div class="venue-title">At Their Residence</div>
+          <div class="venue-address">BEMINA GOUSIA COLONY<br>SRINAGAR</div>
+        </div>
+
+        <div class="rsvp-box">
+          <div>With best compliments from</div>
+          <div style="font-weight: 600; margin: 4px 0 12px; color: #2e4354;">All Relatives & Friends</div>
+          <div style="font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: #6b8296;">R.S.V.P</div>
+          <div class="rsvp-numbers">9797752515 | 7051451808</div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="controls">
+      <button class="btn-nav" id="prevBtn">❮</button>
+      <button class="btn-nav" id="nextBtn">❯</button>
+    </div>
+  </div>
+
+  <script>
+    // Slide Navigation Logic
+    const slides = document.querySelectorAll('.slide');
+    const dots = document.querySelectorAll('.progress-dot');
+    let currentIndex = 0;
+
+    function showSlide(index) {
+      slides.forEach((slide, i) => {
+        slide.classList.toggle('active', i === index);
+        dots[i].classList.toggle('active', i === index);
+      });
+    }
+
+    document.getElementById('nextBtn').addEventListener('click', () => {
+      currentIndex = (currentIndex + 1) % slides.length;
+      showSlide(currentIndex);
+    });
+
+    document.getElementById('prevBtn').addEventListener('click', () => {
+      currentIndex = (currentIndex - 1 + slides.length) % slides.length;
+      showSlide(currentIndex);
+    });
+
+    // Auto-advance slide every 7 seconds
+    setInterval(() => {
+      currentIndex = (currentIndex + 1) % slides.length;
+      showSlide(currentIndex);
+    }, 7000);
+
+    // Falling Petals Canvas Animation
+    const canvas = document.getElementById('petalCanvas');
+    const ctx = canvas.getContext('2d');
+
+    function resizeCanvas() {
+      canvas.width = canvas.parentElement.clientWidth;
+      canvas.height = canvas.parentElement.clientHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    const petals = [];
+    const petalColors = ['#a9cbe4', '#86add1', '#bad6ec', '#688fae'];
+
+    class Petal {
+      constructor() {
+        this.reset();
+      }
+      reset() {
+        this.x = Math.random() * canvas.width;
+        this.y = -20;
+        this.size = Math.random() * 8 + 6;
+        this.speedY = Math.random() * 1.5 + 0.8;
+        this.speedX = (Math.random() - 0.5) * 1.2;
+        this.rotation = Math.random() * 360;
+        this.rotSpeed = (Math.random() - 0.5) * 2;
+        this.color = petalColors[Math.floor(Math.random() * petalColors.length)];
+        this.opacity = Math.random() * 0.5 + 0.3;
+      }
+      update() {
+        this.y += this.speedY;
+        this.x += this.speedX + Math.sin(this.y * 0.02) * 0.5;
+        this.rotation += this.rotSpeed;
+        if (this.y > canvas.height + 20) {
+          this.reset();
+        }
+      }
+      draw() {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate((this.rotation * Math.PI) / 180);
+        ctx.globalAlpha = this.opacity;
+        ctx.fillStyle = this.color;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, this.size, this.size / 2, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    for (let i = 0; i < 24; i++) {
+      petals.push(new Petal());
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      petals.forEach(petal => {
+        petal.update();
+        petal.draw();
+      });
+      requestAnimationFrame(animate);
+    }
+    animate();
+  </script>
+</body>
+</html>
